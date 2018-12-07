@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Application</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#run').click(function () {
+                $('#result').html("<br>");
+                $.ajax({
+                    url: "./query",
+                    type: 'POST',
+                    data: {
+                        query: $('#Query').val(),
+                        type: $('input:radio[name=dbButton]:checked').val()
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            $('#te').val(data.time + "s");
+                            var HTML = "";
+                            HTML += "<table border=\"1\">";
+                            $.each(data.result, function (index, row) {
+                                HTML += "<tr>";
+                                $.each(row, function (index, element) {
+                                    HTML += "<td>";
+                                    HTML += element;
+                                    HTML += "</td>"
+                                });
+                                HTML += "</tr>";
+                            });
+                            HTML += "</table>";
+                            $('#result').append(HTML);
+                        }
+                        else if (data.status === "ERROR") {
+                            $('#te').val(data.time + "s");
+                            $('#result').append(data.result);
+                        }
+                    },
+                    error: function (request, error) {
+                        alert("Request: " + JSON.stringify(request));
+                    }
+                })
+            });
+        });
+
+        function tab(obj) {
+            if (event.keyCode == 9) {
+                obj.value = obj.value + "  "; // 跳几格由你自已决定
+                event.returnValue = false;
+            }
+        }
+
+        function refreshPage() {
+            window.location.reload(true);
+        }
+    </script>
+    <style>
+        .db {
+            text-align: center;
+        }
+
+        #Query {
+            height: 250px;
+            width: 100%;
+        }
+
+        #run {
+            width: 100px;
+            margin-right: 1050px;
+            margin-bottom: 4px;
+            margin-top: 4px;
+        }
+
+        #result {
+            height: 100%;
+            width: 100%;
+            border: solid;
+            align-content: left;
+        }
+    </style>
+</head>
+<body>
+<div class="db">
+    <input type="radio" value="SqlServer" id="db1" name="dbButton" checked="true">SqlServer
+    <input type="radio" value="BigQuery" id="db2" name="dbButton">BigQuery<br>
+</div>
+<p>Query : <br></p>
+<textarea rows="1" cols="50" id="Query" class="comments" onkeydown="tab(this)"></textarea><br>
+<input type="submit" value="Run" id="run" style="float: left;">
+<input type="submit" value="Clear" id="clear" onclick="refreshPage()" style="float:left;">
+<input type="text" id="te" readonly>Time Elapsed<br>
+<div id="result"><br></div>
+</body>
+</html>
